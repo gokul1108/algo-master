@@ -3,28 +3,37 @@ import prisma from "@/lib/prisma";
 
 export const onBoardUser = async () => {
   try {
-    const user = await currentUser();
-    if (!user) {
-      return { success: false, message: "No authenticated user found." };
+    const clerkUser = await currentUser();
+    if (!clerkUser) {
+      return { success: false, error: "UNAUTHORIZED" };
     }
-    const { id, emailAddresses, firstName, lastName, imageUrl } = user;
+
+    const { firstName, lastName, imageUrl } = clerkUser;
+    const primaryEmail = clerkUser.emailAddresses.find(
+      (email) => email.id === clerkUser.primaryEmailAddressId
+    )?.emailAddress;
+
+    if (!primaryEmail) {
+      return { success: false, message: "No email found." };
+    }
+
     const newUser = await prisma.user.upsert({
-      where: { clerkId: id },
+      where: { clerkId: clerkUser.id },
       update: {
-        email: emailAddresses[0]?.emailAddress || "",
-        firstName: firstName || "",
-        lastName: lastName || "",
-        imageUrl: imageUrl || "",
+        email: primaryEmail || "",
+        firstName: firstName ?? "",
+        lastName: lastName ?? "",
+        imageUrl: imageUrl ?? "",
       },
       create: {
-        clerkId: id,
-        email: emailAddresses[0]?.emailAddress || "",
-        firstName: firstName || "",
-        lastName: lastName || "",
-        imageUrl: imageUrl || "",
+        clerkId: clerkUser.id,
+        email: primaryEmail || "",
+        firstName: firstName ?? "",
+        lastName: lastName ?? "",
+        imageUrl: imageUrl ?? "",
       },
     });
-    return { success: true, user: newUser };
+    return { success: true, data: newUser, message: "User onboarded successfully." };
   } catch (error) {
     return { success: false, message: "Error fetching authenticated user." };
   }
