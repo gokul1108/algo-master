@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -18,15 +12,109 @@ enum Role {
   ADMIN
 }
 
+enum Language {
+  PYTHON
+  JAVASCRIPT
+  JAVA
+}
+
 model User {
-  id        Int      @id @default(autoincrement())
-  clerkId   String   @unique
-  name      String?
-  email     String   @unique
-  role      Role     @default(USER)
-  firstName String?
-  lastName  String?
-  imageUrl  String?
+  id               String       @id @default(uuid())
+  clerkId          String    @unique
+  name             String?
+  email            String    @unique
+  role             Role      @default(USER)
+  firstName        String?
+  lastName         String?
+  imageUrl         String?
+  authoredProblems Problem[]
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+model Problem {
+  id          String     @id @default(uuid())
+  title       String
+  description String
+  difficulty  Difficulty
+  tags        String[]
+
+  authorId String
+  author   User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  constraints String
+  hints       String?
+  editorial   String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  examples     ProblemExample[]
+  testcases    TestCase[]
+  codeSnippets CodeSnippet[]
+  solutions    Solution[]
+
+  @@index([difficulty])
+}
+
+model ProblemExample {
+  id          String  @id @default(uuid())
+  problemId   String
+  input       String
+  output      String
+  explanation String?
+
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([problemId])
+}
+
+model TestCase {
+  id        String @id @default(uuid())
+  problemId String
+  input     String
+  expected  String
+
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([problemId])
+}
+
+model CodeSnippet {
+  id          String   @id @default(uuid())
+  problemId   String
+  language    Language
+  starterCode String
+
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([problemId])
+  @@unique([problemId, language])
+}
+
+model Solution {
+  id        String  @id @default(uuid())
+  problemId String
+  problem   Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  language    Language
+  code        String
+  explanation String?
+
+  createdAt DateTime @default(now())
+
+  @@unique([problemId, language])
 }

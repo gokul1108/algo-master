@@ -1,4 +1,4 @@
-import { currentUser } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 
 export const onBoardUser = async () => {
@@ -35,6 +35,52 @@ export const onBoardUser = async () => {
     });
     return { success: true, data: newUser, message: "User onboarded successfully." };
   } catch (error) {
-    return { success: false, message: "Error fetching authenticated user." };
+    return { success: false, error: "SERVER_ERROR", message: (error as Error).message};
   }
 };
+
+export const currentUserRole = async () =>{
+  try{
+    
+
+    const clerkUser = await currentUser();
+    if (!clerkUser) {
+      return { success: false, error: "UNAUTHORIZED" };
+    }
+    const { id } = clerkUser;
+    const user = await prisma.user.findUnique({
+      where: {clerkId: id},
+      select: {role: true}
+    });
+    if(!user){
+      return { success: false, error: "USER_NOT_FOUND" };
+    }
+    return { success: true, data: user.role };
+
+
+
+  }catch(error){
+    return { success: false, error: "SERVER_ERROR", message: (error as Error).message};
+
+  }
+}
+
+export const getDBUserId = async ()=>{
+  try{
+    const userAuth =await auth();
+    if(!userAuth.userId){
+      return { success: false, error: "UNAUTHORIZED" };
+    }
+    const userId = await prisma.user.findUnique({
+      where: {clerkId: userAuth.userId},
+      select: {id: true}
+    });
+    if(!userId){
+      return { success: false, error: "USER_NOT_FOUND" };
+    }
+    return { success: true, data: userId.id };
+  }catch(error){
+    return { success: false, error: "SERVER_ERROR", message: (error as Error).message};
+
+  }
+}
