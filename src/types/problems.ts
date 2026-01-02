@@ -92,3 +92,15 @@ export const ProblemReadSchema = z.object({
 });
 
 export type ProblemRead = z.infer<typeof ProblemReadSchema>;
+
+
+const submitBatchSchema = z.object({
+    source_code: z.string(),
+    language_id: z.number(),
+    stdin: z.string(),
+    
+});
+
+export const SubmitBatchSchema = z.array(submitBatchSchema);
+
+export type SubmitBatch = z.infer<typeof SubmitBatchSchema>;

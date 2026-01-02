@@ -2,6 +2,7 @@ import { currentUserRole, getDBUserId } from "@/modules/auth/actions";
 import { CreateProblemSchema } from "@/types/problems";
 import { NextResponse, NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
+import { getJudge0LanguageId, submitBatch } from "@/lib/judge0";
 
 export async function POST(req: NextRequest) {
     try {
@@ -20,6 +21,33 @@ export async function POST(req: NextRequest) {
         if(!data){
             return NextResponse.json({ success: false, error: "INVALID_DATA" }, { status: 400 });
         }
+        console.log("Received problem data:", data);
+
+        // Validate solutions by submitting to Judge0
+        console.log("Validating solutions with Judge0........." + " "+ Object.entries(data.solution));
+        for(const [language,code] of Object.entries(data.solution)){
+            console.log("Validating solution for language:", code.language); 
+            console.log("Code:", code);
+            const languageId = getJudge0LanguageId(code.language);
+            if(!languageId){
+                return NextResponse.json({ success: false, error: "UNSUPPORTED_LANGUAGE", message: `Language ${language} is not supported for solutions.` }, { status: 400 });
+            }
+            console.log(data.testCases);
+            const submission = data.testCases.map((input)=>({
+                source_code:code.code,
+                language_id:languageId,
+                stdin:input.input,
+                
+
+
+            }));
+            console.log("Prepared submissions for Judge0:", submission);
+
+            //submit to judge0 to validate
+            const submissionResult = await submitBatch(submission);
+
+        }
+
         const newProblem = await prisma.problem.create({
             data: {
                 title: data.title,
@@ -48,10 +76,6 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: true, data: newProblem
 
         });
-
-        
-
-
     }catch (error) {
         return NextResponse.json({ success: false, error: "SERVER_ERROR", message: (error as Error).message }, { status: 500 });
     }
