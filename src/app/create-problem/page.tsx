@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Trash2, Loader2 } from "lucide-react";
+import { Plus, Trash2, Loader2, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 
 type Difficulty = "EASY" | "MEDIUM" | "HARD";
@@ -73,6 +73,101 @@ const CreateProblem = () => {
   const [solutions, setSolutions] = useState<Solution[]>([
     { language: "PYTHON", code: "", explanation: "" },
   ]);
+
+  const fillSampleData = () => {
+    setTitle("Two Sum");
+    setDescription(
+      `Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.
+
+You may assume that each input would have exactly one solution, and you may not use the same element twice.
+
+You can return the answer in any order.`
+    );
+    setDifficulty("EASY");
+    setTags(["Array", "Hash Table"]);
+    setConstraints(
+      `2 <= nums.length <= 10^4
+-10^9 <= nums[i] <= 10^9
+-10^9 <= target <= 10^9
+Only one valid answer exists.`
+    );
+    setHints(
+      "Think about using a hash map to store the numbers you've seen so far and their indices."
+    );
+    setEditorial(
+      `The brute force approach would be to check every pair of numbers, which takes O(n^2) time. However, we can use a hash map to achieve O(n) time complexity. As we iterate through the array, we check if the complement (target - current number) exists in the hash map. If it does, we've found our answer. If not, we add the current number and its index to the hash map.`
+    );
+    setExamples([
+      {
+        input: "nums = [2,7,11,15], target = 9",
+        output: "[0,1]",
+        explanation:
+          "Because nums[0] + nums[1] == 9, we return [0, 1].",
+      },
+      {
+        input: "nums = [3,2,4], target = 6",
+        output: "[1,2]",
+        explanation: "Because nums[1] + nums[2] == 6, we return [1, 2].",
+      },
+      {
+        input: "nums = [3,3], target = 6",
+        output: "[0,1]",
+        explanation: "",
+      },
+    ]);
+    setTestCases([
+      { input: "[2,7,11,15]\n9", expected: "[0,1]" },
+      { input: "[3,2,4]\n6", expected: "[1,2]" },
+      { input: "[3,3]\n6", expected: "[0,1]" },
+      { input: "[1,2,3,4,5]\n9", expected: "[3,4]" },
+    ]);
+    setCodeSnippets([
+      {
+        language: "PYTHON",
+        starterCode: `def twoSum(nums: list[int], target: int) -> list[int]:
+    # Write your solution here
+    pass`,
+      },
+      {
+        language: "JAVASCRIPT",
+        starterCode: `function twoSum(nums, target) {
+    // Write your solution here
+}`,
+      },
+    ]);
+    setSolutions([
+      {
+        language: "PYTHON",
+        code: `def twoSum(nums: list[int], target: int) -> list[int]:
+    seen = {}
+    for i, num in enumerate(nums):
+        complement = target - num
+        if complement in seen:
+            return [seen[complement], i]
+        seen[num] = i
+    return []`,
+        explanation:
+          "We use a hash map to store each number and its index. For each number, we check if its complement exists in the map.",
+      },
+      {
+        language: "JAVASCRIPT",
+        code: `function twoSum(nums, target) {
+    const seen = new Map();
+    for (let i = 0; i < nums.length; i++) {
+        const complement = target - nums[i];
+        if (seen.has(complement)) {
+            return [seen.get(complement), i];
+        }
+        seen.set(nums[i], i);
+    }
+    return [];
+}`,
+        explanation:
+          "Same approach using JavaScript Map for O(1) lookups.",
+      },
+    ]);
+    toast.success("Sample data filled!");
+  };
 
   const addTag = () => {
     if (tagInput.trim() && !tags.includes(tagInput.trim())) {
@@ -228,7 +323,17 @@ const CreateProblem = () => {
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-8">Create New Problem</h1>
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-3xl font-bold">Create New Problem</h1>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={fillSampleData}
+        >
+          <Wand2 className="h-4 w-4 mr-2" />
+          Fill Sample Data
+        </Button>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Basic Information */}

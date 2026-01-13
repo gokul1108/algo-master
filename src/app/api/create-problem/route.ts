@@ -2,7 +2,7 @@ import { currentUserRole, getDBUserId } from "@/modules/auth/actions";
 import { CreateProblemSchema } from "@/types/problems";
 import { NextResponse, NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
-import { getJudge0LanguageId, submitBatch } from "@/lib/judge0";
+import { getJudge0LanguageId, pollBatchResults, submitBatch } from "@/lib/judge0";
 
 export async function POST(req: NextRequest) {
     try {
@@ -37,14 +37,21 @@ export async function POST(req: NextRequest) {
                 source_code:code.code,
                 language_id:languageId,
                 stdin:input.input,
-                
-
 
             }));
             console.log("Prepared submissions for Judge0:", submission);
 
             //submit to judge0 to validate
             const submissionResult = await submitBatch(submission);
+
+            console.log("Submission result from Judge0:", submissionResult);
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const tokens = submissionResult.map((res: any) => res.token);
+
+            const results = await pollBatchResults(tokens);
+            console.log(results);
+
 
         }
 
