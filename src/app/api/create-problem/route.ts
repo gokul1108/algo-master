@@ -24,30 +24,32 @@ export async function POST(req: NextRequest) {
         console.log("Received problem data:", data);
 
         // Validate solutions by submitting to Judge0
-        console.log("Validating solutions with Judge0........." + " "+ Object.entries(data.solution));
-        for(const [language,code] of Object.entries(data.solution)){
-            console.log("Validating solution for language:", code.language); 
-            console.log("Code:", code);
-            const languageId = getJudge0LanguageId(code.language);
+        console.log("Validating solutions with Judge0.........", data.solution);
+        for(const solution of data.solution){
+            console.log("Validating solution for language:", solution.language); 
+            console.log("Code:", solution.code);
+            const languageId = getJudge0LanguageId(solution.language);
             if(!languageId){
-                return NextResponse.json({ success: false, error: "UNSUPPORTED_LANGUAGE", message: `Language ${language} is not supported for solutions.` }, { status: 400 });
+                return NextResponse.json({ success: false, error: "UNSUPPORTED_LANGUAGE", message: `Language ${solution.language} is not supported for solutions.` }, { status: 400 });
             }
             console.log(data.testCases);
-            const submission = data.testCases.map((input)=>({
-                source_code:code.code,
+            const submissions = data.testCases.map((testCase)=>({
+                source_code:solution.code,
                 language_id:languageId,
-                stdin:input.input,
+                stdin:testCase.input,
+                expected_output:testCase.expected
 
             }));
-            console.log("Prepared submissions for Judge0:", submission);
+            console.log("Prepared submissions for Judge0:", submissions);
 
             //submit to judge0 to validate
-            const submissionResult = await submitBatch(submission);
+            const submissionResult = await submitBatch(submissions);
 
             console.log("Submission result from Judge0:", submissionResult);
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const tokens = submissionResult.map((res: any) => res.token);
+            console.log("Polling for results with tokens:", tokens);
 
             const results = await pollBatchResults(tokens);
             console.log(results);

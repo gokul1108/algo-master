@@ -1,7 +1,7 @@
 import { SubmitBatch } from "@/types/problems";
 import axios from "axios";
 import { NextResponse } from "next/server";
-import { base64 } from "zod";
+
 export function getJudge0LanguageId(language: string){
     const languageMap: Record<string, number> = {
         "PYTHON":71,
@@ -12,12 +12,12 @@ export function getJudge0LanguageId(language: string){
     return languageMap[language.toUpperCase()];
 }
 
-export async function submitBatch(submission:SubmitBatch) {
+export async function submitBatch(submissions:SubmitBatch) {
     console.log("Submitting to Judge0:");
     console.log(process.env.JUDGE0_API_URL)
     try{
-        const response  = await axios.post(`${process.env.JUDGE0_API_URL}/submissions/batch?base64_encoded=false&`,{
-        submission
+        const response  = await axios.post(`${process.env.JUDGE0_API_URL}/submissions/batch?base64_encoded=false`,{
+        submissions
     });
     
     console.log("Judge0 Response:", response.data);
@@ -40,7 +40,7 @@ export async function pollBatchResults(tokens: string[]) {
     let retries = 0;
 
     while(retries < MAX_RETRIES) {
-        const {data} = await axios.get(`${process.env.JUDGE0_API_URL}/submission/batch`,
+        const {data} = await axios.get(`${process.env.JUDGE0_API_URL}/submissions/batch`,
             {
                 params:{
                     tokens:tokens.join(","),
@@ -50,7 +50,7 @@ export async function pollBatchResults(tokens: string[]) {
         );
         retries++;
         console.log(data);
-        const result = data.submission;
+        const result = data.submissions;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const isAllDone = result.every((r :any)=>r.status.id !==1 && r.status.id !==2
         );
