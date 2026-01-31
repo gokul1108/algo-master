@@ -21,10 +21,7 @@ export async function POST(req: NextRequest) {
         if(!data){
             return NextResponse.json({ success: false, error: "INVALID_DATA" }, { status: 400 });
         }
-        console.log("Received problem data:", data);
-
-        // Validate solutions by submitting to Judge0
-        console.log("Validating solutions with Judge0.........", data.solution);
+        
         for(const solution of data.solution){
             console.log("Validating solution for language:", solution.language); 
             console.log("Code:", solution.code);
@@ -32,7 +29,7 @@ export async function POST(req: NextRequest) {
             if(!languageId){
                 return NextResponse.json({ success: false, error: "UNSUPPORTED_LANGUAGE", message: `Language ${solution.language} is not supported for solutions.` }, { status: 400 });
             }
-            console.log(data.testCases);
+            
             const submissions = data.testCases.map((testCase)=>({
                 source_code:solution.code,
                 language_id:languageId,
