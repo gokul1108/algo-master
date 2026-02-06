@@ -13,30 +13,6 @@ A full-stack competitive programming platform built with **Next.js 16**, **Prism
 
 
 
-```
-src/
-├── app/                          # Next.js App Router
-│   ├── (auth)/                   # Auth pages (sign-in, sign-up)
-│   ├── (root)/                   # Main layout (landing page)
-│   ├── api/                      # API routes (problem creation, code submission)
-│   └── create-problem/           # Problem creation page
-├── components/
-│   ├── problems/                 # Problem form components
-│   ├── providers/                # Theme provider
-│   └── ui/                       # shadcn/ui components
-├── generated/prisma/             # Prisma generated client
-├── hooks/                        # Custom React hooks
-├── lib/
-│   ├── judge0.ts                 # Judge0 API integration
-│   ├── prisma.ts                 # Prisma client instance
-│   ├── utils.ts                  # Utility functions
-│   └── languages/                # Language-specific configs (java, js, python)
-├── modules/
-│   ├── auth/                     # Auth actions & helpers
-│   └── home/                     # Landing page section components
-└── types/                        # TypeScript type definitions
-```
-
 ## Getting Started
 
 ### Prerequisites
