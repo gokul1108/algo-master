@@ -1,36 +1,102 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AlgoMaster
+
+A full-stack competitive programming platform built with **Next.js 16**, **Prisma**, and **Judge0** for real-time code execution. Practice coding problems, write solutions in multiple languages, and get instant feedback — all in the browser.
+
+## Features
+
+- **Interactive Code Editor** — Monaco-based editor with syntax highlighting for Python, JavaScript, and Java
+- **Real-time Code Execution** — Solutions are evaluated via [Judge0](https://judge0.com) with batch test case submission
+- **Problem Management** — Admin users can create problems with examples, test cases, code snippets, and editorial solutions
+- **Authentication** — Powered by [Clerk](https://clerk.com) with role-based access (User / Admin)
+- **Dark / Light Mode** — Theme toggle with `next-themes`
+- **Dockerized** — One-command setup with Docker Compose (app + PostgreSQL)
+
+
+
+```
+src/
+├── app/                          # Next.js App Router
+│   ├── (auth)/                   # Auth pages (sign-in, sign-up)
+│   ├── (root)/                   # Main layout (landing page)
+│   ├── api/                      # API routes (problem creation, code submission)
+│   └── create-problem/           # Problem creation page
+├── components/
+│   ├── problems/                 # Problem form components
+│   ├── providers/                # Theme provider
+│   └── ui/                       # shadcn/ui components
+├── generated/prisma/             # Prisma generated client
+├── hooks/                        # Custom React hooks
+├── lib/
+│   ├── judge0.ts                 # Judge0 API integration
+│   ├── prisma.ts                 # Prisma client instance
+│   ├── utils.ts                  # Utility functions
+│   └── languages/                # Language-specific configs (java, js, python)
+├── modules/
+│   ├── auth/                     # Auth actions & helpers
+│   └── home/                     # Landing page section components
+└── types/                        # TypeScript type definitions
+```
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Node.js 20+
+- Docker & Docker Compose (for database, or a standalone PostgreSQL instance)
+- A [Clerk](https://clerk.com) account (publishable + secret keys)
+- A [Judge0](https://judge0.com) instance URL
+
+### Environment Variables
+
+Create a `.env` file in the project root:
+
+```env
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/algo_master
+
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+
+JUDGE0_API_URL=http://localhost:2358
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Run with Docker Compose
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+docker compose up -d
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+This starts the Next.js app on [http://localhost:3000](http://localhost:3000) and PostgreSQL on port 5432.
 
-## Learn More
+### Run Locally (without Docker)
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+# Install dependencies
+npm install
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Start a local PostgreSQL (or use Docker for just the DB)
+docker compose up db -d
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Generate Prisma client & run migrations
+npx prisma generate
+npx prisma migrate dev
 
-## Deploy on Vercel
+# Start the dev server
+npm run dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Open [http://localhost:3000](http://localhost:3000) to see the app.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Scripts
+
+| Command           | Description                        |
+| ----------------- | ---------------------------------- |
+| `npm run dev`     | Start development server           |
+| `npm run build`   | Create production build            |
+| `npm run start`   | Start production server            |
+| `npm run lint`    | Run ESLint                         |
+
+## License
+
+This project is private and not licensed for redistribution.
